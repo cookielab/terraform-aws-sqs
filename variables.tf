@@ -89,6 +89,8 @@ variable "tags" {
 
 locals {
   prefix        = var.prefix != "" ? (endswith(var.prefix, "-") ? var.prefix : "${var.prefix}-") : ""
-  main_sqs_name = var.name_main != "" ? var.name_main : "${local.prefix}${var.name}${var.suffix_main}"
-  dlq_sqs_name  = var.name_dlq != "" ? var.name_dlq : "${local.prefix}${var.name}${var.suffix_dlq}"
+  suffix_main   = var.fifo ? "${var.suffix_main}.fifo" : var.suffix_main
+  suffix_dlq    = var.fifo ? "${var.suffix_dlq}.fifo" : var.suffix_dlq
+  main_sqs_name = var.name_main != "" ? var.name_main : "${local.prefix}${var.name}${local.suffix_main}"
+  dlq_sqs_name  = var.name_dlq != "" ? var.name_dlq : "${local.prefix}${var.name}${local.suffix_dlq}"
 }
