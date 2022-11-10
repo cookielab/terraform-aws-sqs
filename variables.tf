@@ -9,6 +9,12 @@ variable "prefix" {
   description = "Prefix for both of the queues"
 }
 
+variable "suffix_main" {
+  type        = string
+  default     = "-main"
+  description = "Suffix for the main queue"
+}
+
 variable "suffix_dlq" {
   type        = string
   default     = "-dlq"
@@ -83,6 +89,6 @@ variable "tags" {
 
 locals {
   prefix        = var.prefix != "" ? (endswith(var.prefix, "-") ? var.prefix : "${var.prefix}-") : ""
-  main_sqs_name = var.name_main != "" ? var.name_main : "${local.prefix}${var.name}"
+  main_sqs_name = var.name_main != "" ? var.name_main : "${local.prefix}${var.name}${var.suffix_main}"
   dlq_sqs_name  = var.name_dlq != "" ? var.name_dlq : "${local.prefix}${var.name}${var.suffix_dlq}"
 }
