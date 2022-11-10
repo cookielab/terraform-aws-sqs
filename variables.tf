@@ -34,7 +34,7 @@ variable "name_dlq" {
 }
 
 variable "fifo" {
-  type        = boolean
+  type        = bool
   default     = false
   description = "Set queue type to FIFO"
 }
