@@ -1,6 +1,6 @@
 data "aws_caller_identity" "current" {}
 
-data "aws_iam_policy_document" "dlq" {
+data "aws_iam_policy_document" "default" {
   statement {
     effect    = "Allow"
     resources = [aws_sqs_queue.dlq.arn]
@@ -20,18 +20,13 @@ data "aws_iam_policy_document" "dlq" {
   }
 }
 
-resource "aws_sqs_queue_policy" "dlq" {
-  queue_url = aws_sqs_queue.dlq.id
-  policy    = data.aws_iam_policy_document.dlq.json
-}
-
 resource "aws_sqs_queue" "dlq" {
   name                        = local.dlq_sqs_name
   fifo_queue                  = var.fifo
   content_based_deduplication = false
   message_retention_seconds   = var.dlq_retention_time
   visibility_timeout_seconds  = var.dlq_visibility_timeout
-  policy                      = var.policy
+  policy                      = local.dlq_policy
 
   tags = var.tags
 }
@@ -43,7 +38,7 @@ resource "aws_sqs_queue" "main" {
   message_retention_seconds   = var.main_retention_time
   visibility_timeout_seconds  = var.main_visibility_timeout
   delay_seconds               = var.main_delay_time
-  policy                      = var.policy
+  policy                      = local.main_policy
 
   redrive_policy = jsonencode({
     deadLetterTargetArn = aws_sqs_queue.dlq.arn,

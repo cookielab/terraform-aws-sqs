@@ -39,10 +39,10 @@ variable "fifo" {
   description = "Set queue type to FIFO"
 }
 
-variable "policy" {
+variable "main_policy" {
   type        = string
   default     = ""
-  description = "Optional queues policy to attach"
+  description = "Optional queues policy to attach to main queue"
 }
 
 variable "main_retention_time" {
@@ -61,6 +61,12 @@ variable "main_delay_time" {
   type        = number
   default     = 0
   description = "Message delay for the main queue (in seconds)"
+}
+
+variable "dlq_policy" {
+  type        = string
+  default     = ""
+  description = "Optional queue policy to attach to DLQ"
 }
 
 variable "dlq_retention_time" {
@@ -93,4 +99,6 @@ locals {
   suffix_dlq    = var.fifo ? "${var.suffix_dlq}.fifo" : var.suffix_dlq
   main_sqs_name = var.name_main != "" ? var.name_main : "${local.prefix}${var.name}${local.suffix_main}"
   dlq_sqs_name  = var.name_dlq != "" ? var.name_dlq : "${local.prefix}${var.name}${local.suffix_dlq}"
+  main_policy   = var.main_policy != "" ? var.main_policy : data.aws_iam_policy_document.default.json
+  dlq_policy    = var.dlq_policy != "" ? var.dlq_policy : data.aws_iam_policy_document.default.json
 }
