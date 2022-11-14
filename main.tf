@@ -1,6 +1,17 @@
+locals {
+  prefix          = var.prefix != "" ? (endswith(var.prefix, "-") ? var.prefix : "${var.prefix}-") : ""
+  suffix_main     = var.fifo ? "${var.suffix_main}.fifo" : var.suffix_main
+  suffix_dlq      = var.fifo ? "${var.suffix_dlq}.fifo" : var.suffix_dlq
+  main_sqs_name   = var.name_main != "" ? var.name_main : "${local.prefix}${var.name}${local.suffix_main}"
+  main_sqs_policy = var.main_policy
+  dlq_sqs_name    = var.name_dlq != "" ? var.name_dlq : "${local.prefix}${var.name}${local.suffix_dlq}"
+  dlq_sqs_policy  = var.dlq_policy != "" ? var.dlq_policy : data.aws_iam_policy_document.dlq.json
+}
+
 data "aws_caller_identity" "current" {}
 
-data "aws_iam_policy_document" "default" {
+# DLQ
+data "aws_iam_policy_document" "dlq" {
   statement {
     effect    = "Allow"
     resources = [aws_sqs_queue.dlq.arn]
@@ -26,11 +37,16 @@ resource "aws_sqs_queue" "dlq" {
   content_based_deduplication = false
   message_retention_seconds   = var.dlq_retention_time
   visibility_timeout_seconds  = var.dlq_visibility_timeout
-  policy                      = local.dlq_policy
 
   tags = var.tags
 }
 
+resource "aws_sqs_queue_policy" "dlq" {
+  queue_url = aws_sqs_queue.dlq.id
+  policy    = local.dlq_sqs_policy
+}
+
+# Main
 resource "aws_sqs_queue" "main" {
   name                        = local.main_sqs_name
   fifo_queue                  = var.fifo
@@ -38,7 +54,7 @@ resource "aws_sqs_queue" "main" {
   message_retention_seconds   = var.main_retention_time
   visibility_timeout_seconds  = var.main_visibility_timeout
   delay_seconds               = var.main_delay_time
-  policy                      = local.main_policy
+  policy                      = local.main_sqs_policy
 
   redrive_policy = jsonencode({
     deadLetterTargetArn = aws_sqs_queue.dlq.arn,

@@ -92,13 +92,3 @@ variable "tags" {
   default     = {}
   description = "AWS tags to apply to the queues"
 }
-
-locals {
-  prefix        = var.prefix != "" ? (endswith(var.prefix, "-") ? var.prefix : "${var.prefix}-") : ""
-  suffix_main   = var.fifo ? "${var.suffix_main}.fifo" : var.suffix_main
-  suffix_dlq    = var.fifo ? "${var.suffix_dlq}.fifo" : var.suffix_dlq
-  main_sqs_name = var.name_main != "" ? var.name_main : "${local.prefix}${var.name}${local.suffix_main}"
-  dlq_sqs_name  = var.name_dlq != "" ? var.name_dlq : "${local.prefix}${var.name}${local.suffix_dlq}"
-  main_policy   = var.main_policy != "" ? var.main_policy : data.aws_iam_policy_document.default.json
-  dlq_policy    = var.dlq_policy != "" ? var.dlq_policy : data.aws_iam_policy_document.default.json
-}
