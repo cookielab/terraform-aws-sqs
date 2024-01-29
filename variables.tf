@@ -39,6 +39,18 @@ variable "fifo" {
   description = "Set queue type to FIFO"
 }
 
+variable "main_content_based_deduplication" {
+  type        = bool
+  default     = false
+  description = "Turn on content based deduplication"
+}
+
+variable "dlq_content_based_deduplication" {
+  type        = bool
+  default     = false
+  description = "Turn on content based deduplication"
+}
+
 variable "main_policy" {
   type        = string
   default     = ""

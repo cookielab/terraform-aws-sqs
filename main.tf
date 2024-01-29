@@ -34,7 +34,7 @@ data "aws_iam_policy_document" "dlq" {
 resource "aws_sqs_queue" "dlq" {
   name                        = local.dlq_sqs_name
   fifo_queue                  = var.fifo
-  content_based_deduplication = false
+  content_based_deduplication = var.dlq_content_based_deduplication
   message_retention_seconds   = var.dlq_retention_time
   visibility_timeout_seconds  = var.dlq_visibility_timeout
 
@@ -50,7 +50,7 @@ resource "aws_sqs_queue_policy" "dlq" {
 resource "aws_sqs_queue" "main" {
   name                        = local.main_sqs_name
   fifo_queue                  = var.fifo
-  content_based_deduplication = false
+  content_based_deduplication = var.main_content_based_deduplication
   message_retention_seconds   = var.main_retention_time
   visibility_timeout_seconds  = var.main_visibility_timeout
   delay_seconds               = var.main_delay_time
