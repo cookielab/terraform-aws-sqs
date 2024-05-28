@@ -5,16 +5,17 @@ locals {
   main_sqs_name   = var.name_main != "" ? var.name_main : "${local.prefix}${var.name}${local.suffix_main}"
   main_sqs_policy = var.main_policy
   dlq_sqs_name    = var.name_dlq != "" ? var.name_dlq : "${local.prefix}${var.name}${local.suffix_dlq}"
-  dlq_sqs_policy  = var.dlq_policy != "" ? var.dlq_policy : data.aws_iam_policy_document.dlq.json
+  dlq_sqs_policy  = var.create_dlq ? (var.dlq_policy != "" ? var.dlq_policy : data.aws_iam_policy_document.dlq[0].json) : null
 }
 
 data "aws_caller_identity" "current" {}
 
 # DLQ
 data "aws_iam_policy_document" "dlq" {
+  count = var.create_dlq ? 1 : 0
   statement {
     effect    = "Allow"
-    resources = [aws_sqs_queue.dlq.arn]
+    resources = [aws_sqs_queue.dlq[0].arn]
     actions = [
       "sqs:ChangeMessageVisibility",
       "sqs:DeleteMessage",
@@ -32,6 +33,7 @@ data "aws_iam_policy_document" "dlq" {
 }
 
 resource "aws_sqs_queue" "dlq" {
+  count                       = var.create_dlq ? 1 : 0
   name                        = local.dlq_sqs_name
   fifo_queue                  = var.fifo
   content_based_deduplication = var.dlq_content_based_deduplication
@@ -42,7 +44,8 @@ resource "aws_sqs_queue" "dlq" {
 }
 
 resource "aws_sqs_queue_policy" "dlq" {
-  queue_url = aws_sqs_queue.dlq.id
+  count     = var.create_dlq ? 1 : 0
+  queue_url = aws_sqs_queue.dlq[0].id
   policy    = local.dlq_sqs_policy
 }
 
@@ -56,11 +59,10 @@ resource "aws_sqs_queue" "main" {
   delay_seconds               = var.main_delay_time
   policy                      = local.main_sqs_policy
 
-  redrive_policy = jsonencode({
-    deadLetterTargetArn = aws_sqs_queue.dlq.arn,
+  redrive_policy = var.create_dlq ? jsonencode({
+    deadLetterTargetArn = aws_sqs_queue.dlq[0].arn
     maxReceiveCount     = var.max_redrive
-  })
-
+  }) : null
   tags = var.tags
 }
 

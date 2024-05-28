@@ -15,17 +15,17 @@ output "sqs_main_url" {
 }
 
 output "sqs_dlq_name" {
-  value = aws_sqs_queue.dlq.name
+  value = var.create_dlq ? aws_sqs_queue.dlq[0].name : null
 }
 
 output "sqs_dlq_arn" {
-  value = aws_sqs_queue.dlq.arn
+  value = var.create_dlq ? aws_sqs_queue.dlq[0].arn : null
 }
 
 output "sqs_dlq_id" {
-  value = aws_sqs_queue.dlq.id
+  value = var.create_dlq ? aws_sqs_queue.dlq[0].id : null
 }
 
 output "sqs_dlq_url" {
-  value = aws_sqs_queue.dlq.url
+  value = var.create_dlq ? aws_sqs_queue.dlq[0].url : null
 }

@@ -104,3 +104,9 @@ variable "tags" {
   default     = {}
   description = "AWS tags to apply to the queues"
 }
+
+variable "create_dlq" {
+  type        = bool
+  default     = true
+  description = "True if we want to auto create DLQ with SQS queue"
+}
