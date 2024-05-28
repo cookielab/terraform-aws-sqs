@@ -12,9 +12,10 @@ data "aws_caller_identity" "current" {}
 
 # DLQ
 data "aws_iam_policy_document" "dlq" {
+  count = var.create_dlq ? 1 : 0
   statement {
     effect    = "Allow"
-    resources = [aws_sqs_queue.dlq.arn]
+    resources = [aws_sqs_queue.dlq[0].arn]
     actions = [
       "sqs:ChangeMessageVisibility",
       "sqs:DeleteMessage",
@@ -32,6 +33,7 @@ data "aws_iam_policy_document" "dlq" {
 }
 
 resource "aws_sqs_queue" "dlq" {
+  count                       = var.create_dlq ? 1 : 0
   name                        = local.dlq_sqs_name
   fifo_queue                  = var.fifo
   content_based_deduplication = var.dlq_content_based_deduplication
@@ -42,7 +44,8 @@ resource "aws_sqs_queue" "dlq" {
 }
 
 resource "aws_sqs_queue_policy" "dlq" {
-  queue_url = aws_sqs_queue.dlq.id
+  count     = var.create_dlq ? 1 : 0
+  queue_url = aws_sqs_queue.dlq[0].id
   policy    = local.dlq_sqs_policy
 }
 
@@ -56,11 +59,13 @@ resource "aws_sqs_queue" "main" {
   delay_seconds               = var.main_delay_time
   policy                      = local.main_sqs_policy
 
-  redrive_policy = jsonencode({
-    deadLetterTargetArn = aws_sqs_queue.dlq.arn,
-    maxReceiveCount     = var.max_redrive
-  })
-
+  dynamic "redrive_policy" {
+    for_each = var.create_dlq ? [1] : []
+    content {
+      deadLetterTargetArn = aws_sqs_queue.dlq[0].arn
+      maxReceiveCount     = var.max_redrive
+    }
+  }
   tags = var.tags
 }
 
