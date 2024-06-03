@@ -6,6 +6,7 @@ locals {
   main_sqs_policy = var.main_policy
   dlq_sqs_name    = var.name_dlq != "" ? var.name_dlq : "${local.prefix}${var.name}${local.suffix_dlq}"
   dlq_sqs_policy  = var.create_dlq ? (var.dlq_policy != "" ? var.dlq_policy : data.aws_iam_policy_document.dlq[0].json) : null
+  dlq_arn         = var.create_dlq ? aws_sqs_queue.dlq[0].arn : (length(data.aws_sqs_queue.custom_dlq) > 0 ? data.aws_sqs_queue.custom_dlq[0].arn : null)
 }
 
 data "aws_caller_identity" "current" {}
@@ -59,10 +60,9 @@ resource "aws_sqs_queue" "main" {
   delay_seconds               = var.main_delay_time
   policy                      = local.main_sqs_policy
 
-  redrive_policy = var.create_dlq ? jsonencode({
-    deadLetterTargetArn = aws_sqs_queue.dlq[0].arn
+  redrive_policy = local.dlq_arn != null ? jsonencode({
+    deadLetterTargetArn = local.dlq_arn
     maxReceiveCount     = var.max_redrive
   }) : null
   tags = var.tags
 }
-
