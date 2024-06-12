@@ -7,29 +7,30 @@ Basic usage of this module is as follows:
 
 ```hcl
 module "example" {
-	 source  = "<module-path>"
-
+  	 source  = "<module-path>"
+  
 	 # Required variables
-	 name  = 
-
+  	 name  = 
+  
 	 # Optional variables
-	 dlq_content_based_deduplication  = false
-	 dlq_policy  = ""
-	 dlq_retention_time  = 1209600
-	 dlq_visibility_timeout  = 600
-	 fifo  = false
-	 main_content_based_deduplication  = false
-	 main_delay_time  = 0
-	 main_policy  = ""
-	 main_retention_time  = 1209600
-	 main_visibility_timeout  = 600
-	 max_redrive  = 3
-	 name_dlq  = ""
-	 name_main  = ""
-	 prefix  = ""
-	 suffix_dlq  = "-dlq"
-	 suffix_main  = "-main"
-	 tags  = {}
+  	 create_dlq  = true
+  	 dlq_content_based_deduplication  = false
+  	 dlq_policy  = ""
+  	 dlq_retention_time  = 1209600
+  	 dlq_visibility_timeout  = 600
+  	 fifo  = false
+  	 main_content_based_deduplication  = false
+  	 main_delay_time  = 0
+  	 main_policy  = ""
+  	 main_retention_time  = 1209600
+  	 main_visibility_timeout  = 600
+  	 max_redrive  = 3
+  	 name_dlq  = ""
+  	 name_main  = ""
+  	 prefix  = ""
+  	 suffix_dlq  = "-dlq"
+  	 suffix_main  = "-main"
+  	 tags  = {}
 }
 ```
 
@@ -46,6 +47,7 @@ module "example" {
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
+| <a name="input_create_dlq"></a> [create\_dlq](#input\_create\_dlq) | True if we want to auto create DLQ with SQS queue | `bool` | `true` | no |
 | <a name="input_dlq_content_based_deduplication"></a> [dlq\_content\_based\_deduplication](#input\_dlq\_content\_based\_deduplication) | Turn on content based deduplication | `bool` | `false` | no |
 | <a name="input_dlq_policy"></a> [dlq\_policy](#input\_dlq\_policy) | Optional queue policy to attach to DLQ | `string` | `""` | no |
 | <a name="input_dlq_retention_time"></a> [dlq\_retention\_time](#input\_dlq\_retention\_time) | Message retention time in the dead letter queue (in seconds) | `number` | `1209600` | no |
